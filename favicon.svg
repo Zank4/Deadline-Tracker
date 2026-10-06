@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Cute deadline rocket favicon">
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#fff7d6" />
+      <stop offset="100%" stop-color="#ffd9e8" />
+    </linearGradient>
+    <linearGradient id="rocket" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#8ec5ff" />
+      <stop offset="100%" stop-color="#6b9cff" />
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="16" fill="url(#bg)"/>
+  <circle cx="50" cy="14" r="4" fill="#ffcc66"/>
+  <circle cx="18" cy="14" r="3" fill="#ffc0cb"/>
+  <path d="M24 18 L16 10 L10 18 L24 18 Z" fill="#ffd166" opacity="0.9"/>
+  <path d="M23 18 C26 12, 38 12, 41 18 L43 31 C43 39, 35 47, 32 47 H23 C20 47, 12 39, 12 31 L14 20 C15 18, 19 18, 23 18 Z" fill="url(#rocket)"/>
+  <circle cx="22" cy="28" r="3.2" fill="#fff"/>
+  <circle cx="34" cy="28" r="3.2" fill="#fff"/>
+  <circle cx="22" cy="28" r="1.4" fill="#1f2a44"/>
+  <circle cx="34" cy="28" r="1.4" fill="#1f2a44"/>
+  <path d="M26 35 Q28 38 30 35" fill="none" stroke="#1f2a44" stroke-width="2" stroke-linecap="round"/>
+  <path d="M17 40 Q21 44 26 41" fill="none" stroke="#ffc0cb" stroke-width="2" stroke-linecap="round"/>
+  <path d="M33 42 Q39 44 42 40" fill="none" stroke="#ffc0cb" stroke-width="2" stroke-linecap="round"/>
+  <path d="M20 17 L17 12" stroke="#ff9ec2" stroke-width="2" stroke-linecap="round"/>
+  <path d="M35 17 L38 12" stroke="#ff9ec2" stroke-width="2" stroke-linecap="round"/>
+  <path d="M26 11 L28 7 L30 11" fill="#ffcc66"/>
+</svg>
