@@ -406,19 +406,22 @@ button {
 
 .countdown-panel {
   display: flex;
-  min-height: 103px;
+  min-height: 126px;
   align-items: center;
   justify-content: center;
-  gap: 17px;
+  gap: 20px;
+  padding: 12px;
   margin: 18px 0 17px;
+  border: 1px solid var(--tone-border);
   border-radius: 16px;
-  background: color-mix(in srgb, var(--tone-soft) 66%, white);
-  transition: background 350ms ease;
+  background: color-mix(in srgb, var(--tone-soft) 82%, white);
+  box-shadow: 0 5px 14px color-mix(in srgb, var(--tone) 9%, transparent);
+  transition: background 350ms ease, border-color 350ms ease;
 }
 
 .hourglass {
   display: inline-block;
-  font-size: 2.12rem;
+  font-size: 2.7rem;
   line-height: 1;
 }
 
@@ -431,9 +434,9 @@ button {
 }
 
 .countdown-label {
-  margin-bottom: 3px;
+  margin-bottom: 5px;
   color: #596e88;
-  font-size: 0.65rem;
+  font-size: 0.76rem;
   font-weight: 900;
   letter-spacing: 0.09em;
   text-transform: uppercase;
@@ -441,7 +444,7 @@ button {
 
 .countdown {
   color: var(--tone);
-  font-size: clamp(1.16rem, 3vw, 1.55rem);
+  font-size: clamp(1.3rem, 3.4vw, 1.8rem);
   font-variant-numeric: tabular-nums;
   font-weight: 900;
   letter-spacing: 0.015em;
@@ -451,7 +454,7 @@ button {
 
 .countdown.expired-text,
 .countdown.completed-text {
-  font-size: 1.04rem;
+  font-size: 1.14rem;
 }
 
 .progress-block {
