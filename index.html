@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#fff8f5" />
+    <title>Deadline nhỏ xinh</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+    <script src="script.js" defer></script>
+  </head>
+  <body>
+    <main class="page-shell">
+      <header class="hero">
+        <div class="hero-copy">
+          <span class="eyebrow"><span class="eyebrow-dot"></span> GÓC NHỎ CỦA BẠN</span>
+          <h1>Deadline nhỏ xinh <span aria-hidden="true">🚀</span></h1>
+          <p>Chia nhỏ việc cần làm, rồi thong thả hoàn thành từng chút một.</p>
+        </div>
+        <div class="hero-art" aria-hidden="true">
+          <span class="hero-sparkle sparkle-one">✦</span>
+          <span class="hero-mascot">🚀</span>
+          <span class="hero-sparkle sparkle-two">✧</span>
+        </div>
+      </header>
+
+      <section class="create-panel" aria-labelledby="create-heading">
+        <div class="section-heading">
+          <span class="heading-icon" aria-hidden="true">✏️</span>
+          <div>
+            <h2 id="create-heading">Tạo deadline mới</h2>
+            <p>Mọi việc lớn đều bắt đầu từ một bước nhỏ.</p>
+          </div>
+        </div>
+        <form id="deadline-form" class="deadline-form">
+          <label class="field title-field">
+            <span>Tên deadline</span>
+            <input
+              id="deadline-title"
+              name="title"
+              type="text"
+              maxlength="100"
+              placeholder="Ví dụ: Hoàn thành báo cáo"
+              required
+            />
+          </label>
+          <label class="field date-field">
+            <span>Ngày và giờ</span>
+            <input id="deadline-date" name="date" type="datetime-local" required />
+          </label>
+          <button class="button button-primary create-button" type="submit">
+            <span aria-hidden="true">＋</span> Tạo deadline
+          </button>
+        </form>
+        <p id="form-message" class="form-message" role="status" aria-live="polite"></p>
+      </section>
+
+      <section class="deadlines-section" aria-labelledby="deadlines-heading">
+        <div class="list-heading">
+          <div>
+            <span class="eyebrow list-eyebrow">KẾ HOẠCH CỦA BẠN</span>
+            <h2 id="deadlines-heading">Danh sách deadline <span aria-hidden="true">☁️</span></h2>
+          </div>
+          <span id="deadline-count" class="deadline-count">0 deadline</span>
+        </div>
+        <div id="storage-message" class="storage-message" role="alert" hidden></div>
+        <div id="deadline-list" class="deadline-grid"></div>
+        <div id="empty-state" class="empty-state">
+          <span class="empty-illustration" aria-hidden="true">🪴</span>
+          <h3>Chưa có deadline nào</h3>
+          <p>Tạo deadline đầu tiên để bắt đầu sắp xếp công việc nhé!</p>
+        </div>
+      </section>
+
+      <footer class="page-footer">Chậm một chút cũng được, miễn là bạn vẫn đang tiến về phía trước <span aria-hidden="true">♡</span></footer>
+    </main>
+  </body>
+</html>
