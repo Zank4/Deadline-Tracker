@@ -27,6 +27,8 @@ function isValidDeadline(item) {
     typeof item.title === "string" &&
     Number.isFinite(Date.parse(item.createdAt)) &&
     Number.isFinite(Date.parse(item.deadlineAt)) &&
+    (item.overdueCount === undefined ||
+      (Number.isSafeInteger(item.overdueCount) && item.overdueCount >= 0)) &&
     Array.isArray(item.tasks) &&
     item.tasks.every(
       (task) =>
@@ -50,7 +52,7 @@ function loadDeadlines() {
     if (!Array.isArray(parsed) || !parsed.every(isValidDeadline)) {
       throw new Error("Dữ liệu deadline đã lưu không đúng định dạng.");
     }
-    return parsed;
+    return parsed.map((item) => ({ overdueCount: 0, ...item }));
   } catch (error) {
     storageAvailable = false;
     showStorageError(
@@ -108,6 +110,12 @@ function formatDate(dateString) {
   }).format(new Date(dateString));
 }
 
+function formatLocalDateTime(dateString) {
+  const date = new Date(dateString);
+  const pad = (value) => String(value).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
 function getTaskProgress(item) {
   if (item.completed) return { complete: item.tasks.length, total: item.tasks.length, percent: 100 };
   const complete = item.tasks.filter((task) => task.completed).length;
@@ -160,6 +168,7 @@ function renderDeadline(item, now) {
   const timePercent = getTimeProgress(item, now);
   const taskProgress = getTaskProgress(item);
   const isRunning = !item.completed && Date.parse(item.deadlineAt) > now;
+  const isOverdue = !item.completed && Date.parse(item.deadlineAt) <= now;
   const tasksMarkup = item.tasks
     .map(
       (task) => `
@@ -192,6 +201,7 @@ function renderDeadline(item, now) {
         <div class="card-title-wrap">
           <h3 class="card-title"><span aria-hidden="true">📌</span> ${escapeHtml(item.title)}</h3>
           <p class="card-meta">Deadline: <strong>${escapeHtml(formatDate(item.deadlineAt))}</strong></p>
+          ${item.overdueCount > 0 ? `<p class="overdue-count">Đã quá hạn ${item.overdueCount} lần</p>` : ""}
         </div>
         <span class="status-pill"><span aria-hidden="true">${status.icon}</span> ${status.label}</span>
       </div>
@@ -229,10 +239,26 @@ function renderDeadline(item, now) {
         </form>
       </section>
 
+      <form class="deadline-date-form" data-action="save-deadline" data-mode="edit" hidden>
+        <label class="field">
+          <span>Ngày và giờ mới</span>
+          <input type="datetime-local" name="deadlineAt" value="${escapeHtml(formatLocalDateTime(item.deadlineAt))}" required />
+        </label>
+        <p class="deadline-edit-message" role="alert"></p>
+        <div class="deadline-date-actions">
+          <button class="button button-primary" type="submit">Lưu thời hạn</button>
+          <button class="button cancel-edit-button" type="button" data-action="cancel-edit">Hủy</button>
+        </div>
+      </form>
+
       <div class="card-actions">
         <button class="button complete-button" type="button" data-action="complete" ${item.completed ? "disabled" : ""}>
           ${item.completed ? "✓ Đã hoàn thành" : "✓ Hoàn thành tất cả"}
         </button>
+        <div class="deadline-time-actions">
+          <button class="button edit-deadline-button" type="button" data-action="edit-deadline">Chỉnh sửa thời hạn</button>
+          <button class="button renew-deadline-button" type="button" data-action="renew-deadline" ${isOverdue ? "" : "hidden"}>Gia hạn</button>
+        </div>
         <button class="button delete-button" type="button" data-action="delete">🗑 Xóa</button>
       </div>
     </article>`;
@@ -270,6 +296,7 @@ function updateCountdowns() {
     const timeFill = card.querySelector(".progress-fill");
     const wasRunning = card.classList.contains("is-running");
     const isRunning = !item.completed && Date.parse(item.deadlineAt) > now;
+    const renewButton = card.querySelector('[data-action="renew-deadline"]');
 
     card.className = `deadline-card ${status.className}${isRunning ? " is-running" : ""}`;
     countdownElement.textContent = countdown.text;
@@ -278,6 +305,7 @@ function updateCountdowns() {
     timeProgress.setAttribute("aria-valuenow", String(timePercent));
     timeValue.textContent = `${timePercent}%`;
     timeFill.style.width = `${timePercent}%`;
+    renewButton.hidden = item.completed || Date.parse(item.deadlineAt) > now;
 
     if (wasRunning !== isRunning) {
       const completeButton = card.querySelector('[data-action="complete"]');
@@ -302,6 +330,7 @@ form.addEventListener("submit", (event) => {
     title,
     createdAt: new Date().toISOString(),
     deadlineAt: deadlineDate.toISOString(),
+    overdueCount: 0,
     tasks: [],
     completed: false,
     completedAt: null,
@@ -332,6 +361,42 @@ deadlineList.addEventListener("change", (event) => {
 });
 
 deadlineList.addEventListener("submit", (event) => {
+  const deadlineForm = event.target.closest('[data-action="save-deadline"]');
+  if (deadlineForm) {
+    event.preventDefault();
+
+    const card = deadlineForm.closest(".deadline-card");
+    const item = deadlines.find((deadline) => deadline.id === card?.dataset.id);
+    const deadlineDate = new Date(deadlineForm.elements.deadlineAt.value);
+    const isRenewal = deadlineForm.dataset.mode === "renew";
+    const message = deadlineForm.querySelector(".deadline-edit-message");
+    message.textContent = "";
+
+    if (!item || Number.isNaN(deadlineDate.getTime())) {
+      message.textContent = "Vui lòng chọn ngày giờ deadline hợp lệ.";
+      return;
+    }
+    if (isRenewal && (item.completed || Date.parse(item.deadlineAt) > Date.now())) {
+      render();
+      return;
+    }
+    if (isRenewal && deadlineDate.getTime() <= Date.now()) {
+      message.textContent = "Thời hạn mới phải ở tương lai.";
+      return;
+    }
+
+    const previousDeadlineAt = item.deadlineAt;
+    const previousOverdueCount = item.overdueCount;
+    item.deadlineAt = deadlineDate.toISOString();
+    if (isRenewal) item.overdueCount += 1;
+    if (!saveDeadlines()) {
+      item.deadlineAt = previousDeadlineAt;
+      item.overdueCount = previousOverdueCount;
+    }
+    render();
+    return;
+  }
+
   const taskForm = event.target.closest('[data-action="add-task"]');
   if (!taskForm) return;
   event.preventDefault();
@@ -354,7 +419,23 @@ deadlineList.addEventListener("click", (event) => {
   const item = deadlines.find((deadline) => deadline.id === card?.dataset.id);
   if (!item) return;
 
-  if (button.dataset.action === "complete") {
+  if (button.dataset.action === "edit-deadline" || button.dataset.action === "renew-deadline") {
+    if (button.dataset.action === "renew-deadline" &&
+      (item.completed || Date.parse(item.deadlineAt) > Date.now())) return;
+    const dateForm = card.querySelector('[data-action="save-deadline"]');
+    const input = dateForm.elements.deadlineAt;
+    dateForm.dataset.mode = button.dataset.action === "renew-deadline" ? "renew" : "edit";
+    dateForm.querySelector('button[type="submit"]').textContent =
+      button.dataset.action === "renew-deadline" ? "Gia hạn deadline" : "Lưu thời hạn";
+    dateForm.querySelector(".deadline-edit-message").textContent = "";
+    dateForm.hidden = false;
+    input.value = formatLocalDateTime(item.deadlineAt);
+    input.focus();
+  } else if (button.dataset.action === "cancel-edit") {
+    const dateForm = card.querySelector('[data-action="save-deadline"]');
+    dateForm.hidden = true;
+    dateForm.querySelector(".deadline-edit-message").textContent = "";
+  } else if (button.dataset.action === "complete") {
     if (item.completed) return;
     const previousTaskStates = item.tasks.map((task) => task.completed);
     item.tasks.forEach((task) => {
